@@ -2,7 +2,7 @@
 import sys
 from PyQt5.QtCore import pyqtSlot, QTimer
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow
+from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QLabel
 from PyQt5.uic import loadUi
 import cv2
 
@@ -34,7 +34,23 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_button_click(self):
-        self.update_image()
+        name = self.lineEdit.text()
+
+        frame = self.get_image()
+        print(frame)
+        label = QLabel()
+        label.setPixmap(QPixmap.fromImage(QImage(frame.data, 256, 256, QImage.Format_RGB888)));
+
+        self.scrollArea.widget().layout().addWidget(label)
+        self.lineEdit.clear()
+
+    def get_image(self):
+        ret, frame = video_capture.read()
+        # TODO 假定高是 720 宽是 1280 需要后续处理
+        # 截取图像中间的最大正方形
+        dest = cv2.cvtColor(frame[:,280:1000], cv2.COLOR_BGR2RGB)
+        # 变形为 256 x 256 的小正方形
+        return cv2.resize(dest, (256,256), interpolation=cv2.INTER_CUBIC)
 
     def update_image(self):
 
